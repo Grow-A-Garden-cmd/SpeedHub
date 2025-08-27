@@ -11,15 +11,8 @@ local SupportedPets = {
     "Bear", "Lion", "Tiger", "Elephant", "Giraffe", "Monkey", "Panda",
     "Penguin", "Owl", "Eagle", "Parrot", "Turtle", "Frog", "Fish"
 }
-local SupportedSeeds = {
-    "Candy Blossom", "Sunflower", "Rose", "Tulip", "Daisy", "Lily",
-    "Orchid", "Carnation", "Marigold", "Petunia", "Iris", "Daffodil",
-    "Cherry Blossom", "Magic Flower", "Golden Flower", "Rainbow Flower"
-}
 local SupportedEggs = {
-    "Night Egg", "Day Egg", "Common Egg", "Rare Egg", "Epic Egg", "Legendary Egg",
-    "Mythic Egg", "Golden Egg", "Diamond Egg", "Rainbow Egg", "Shadow Egg",
-    "Fire Egg", "Ice Egg", "Earth Egg", "Air Egg", "Water Egg"
+    "Night Egg", "Common Egg", "Uncommon Egg", "Rare Egg", "Bug Egg"
 }
 local ScreenGui
 local MainFrame
@@ -27,13 +20,10 @@ local IsUILoaded = false
 function Spawner.GetPets()
     return SupportedPets
 end
-function Spawner.GetSeeds()
-    return SupportedSeeds
-end
 function Spawner.GetEggs()
     return SupportedEggs
 end
-function Spawner.SpawnPet(petName, weight, age)
+function Spawner.SpawnPet(petName, weight)
     pcall(function()
         if not petName or petName == "" then
             warn("HoDat Hub: Tên pet không được để trống!")
@@ -41,7 +31,6 @@ function Spawner.SpawnPet(petName, weight, age)
         end
         
         if not weight then weight = 1 end
-        if not age then age = 1 end
         
         local isSupported = false
         for _, pet in pairs(SupportedPets) do
@@ -59,46 +48,13 @@ function Spawner.SpawnPet(petName, weight, age)
         local remoteEvents = ReplicatedStorage:GetChildren()
         for _, remote in pairs(remoteEvents) do
             if remote:IsA("RemoteEvent") and (remote.Name:find("Pet") or remote.Name:find("Spawn")) then
-                remote:FireServer(petName, weight, age)
-                print("HoDat Hub: Đã spawn pet " .. petName .. " với " .. weight .. " KG và " .. age .. " tuổi")
+                remote:FireServer(petName, weight)
+                print("HoDat Hub: Đã spawn pet " .. petName .. " với " .. weight .. " KG")
                 return true
             end
         end
         
-        print("HoDat Hub: Đã spawn pet " .. petName .. " với " .. weight .. " KG và " .. age .. " tuổi")
-        return true
-    end)
-end
-function Spawner.SpawnSeed(seedName)
-    pcall(function()
-        if not seedName or seedName == "" then
-            warn("HoDat Hub: Tên seed không được để trống!")
-            return false
-        end
-        
-        local isSupported = false
-        for _, seed in pairs(SupportedSeeds) do
-            if seed:lower() == seedName:lower() then
-                isSupported = true
-                break
-            end
-        end
-        
-        if not isSupported then
-            warn("HoDat Hub: Seed '" .. seedName .. "' không được hỗ trợ!")
-            return false
-        end
-        
-        local remoteEvents = ReplicatedStorage:GetChildren()
-        for _, remote in pairs(remoteEvents) do
-            if remote:IsA("RemoteEvent") and (remote.Name:find("Seed") or remote.Name:find("Plant")) then
-                remote:FireServer(seedName)
-                print("HoDat Hub: Đã spawn seed " .. seedName)
-                return true
-            end
-        end
-        
-        print("HoDat Hub: Đã spawn seed " .. seedName)
+        print("HoDat Hub: Đã spawn pet " .. petName .. " với " .. weight .. " KG")
         return true
     end)
 end
@@ -143,8 +99,8 @@ function Spawner.CreateUI()
     
     MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 400, 0, 450)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -225)
+    MainFrame.Size = UDim2.new(0, 400, 0, 380)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -190)
     MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
@@ -176,7 +132,7 @@ function Spawner.CreateUI()
     ScrollFrame.BackgroundTransparency = 1
     ScrollFrame.ScrollBarThickness = 6
     ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(45, 125, 255)
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 400)
     ScrollFrame.Parent = MainFrame
     
     local UIListLayout = Instance.new("UIListLayout")
@@ -188,37 +144,25 @@ function Spawner.CreateUI()
     
     local PetNameBox = CreateTextBox(ScrollFrame, "Tên Pet (vd: Raccoon)", 2)
     local PetWeightBox = CreateTextBox(ScrollFrame, "Trọng lượng (KG)", 3)
-    local PetAgeBox = CreateTextBox(ScrollFrame, "Tuổi", 4)
     
-    local SpawnPetBtn = CreateButton(ScrollFrame, "🐾 Spawn Pet", 5, Color3.fromRGB(76, 175, 80))
+    local SpawnPetBtn = CreateButton(ScrollFrame, "🐾 Spawn Pet", 4, Color3.fromRGB(76, 175, 80))
     SpawnPetBtn.MouseButton1Click:Connect(function()
         local petName = PetNameBox.Text
         local weight = tonumber(PetWeightBox.Text) or 1
-        local age = tonumber(PetAgeBox.Text) or 1
-        Spawner.SpawnPet(petName, weight, age)
+        Spawner.SpawnPet(petName, weight)
     end)
     
-    CreateSection(ScrollFrame, "🌱 SEEDS", 6)
+    CreateSection(ScrollFrame, "🥚 EGGS", 5)
     
-    local SeedNameBox = CreateTextBox(ScrollFrame, "Tên Seed (vd: Candy Blossom)", 7)
+    local EggNameBox = CreateTextBox(ScrollFrame, "Tên Egg (vd: Night Egg)", 6)
     
-    local SpawnSeedBtn = CreateButton(ScrollFrame, "🌱 Spawn Seed", 8, Color3.fromRGB(139, 195, 74))
-    SpawnSeedBtn.MouseButton1Click:Connect(function()
-        local seedName = SeedNameBox.Text
-        Spawner.SpawnSeed(seedName)
-    end)
-    
-    CreateSection(ScrollFrame, "🥚 EGGS", 9)
-    
-    local EggNameBox = CreateTextBox(ScrollFrame, "Tên Egg (vd: Night Egg)", 10)
-    
-    local SpawnEggBtn = CreateButton(ScrollFrame, "🥚 Spawn Egg", 11, Color3.fromRGB(255, 193, 7))
+    local SpawnEggBtn = CreateButton(ScrollFrame, "🥚 Spawn Egg", 7, Color3.fromRGB(255, 193, 7))
     SpawnEggBtn.MouseButton1Click:Connect(function()
         local eggName = EggNameBox.Text
         Spawner.SpawnEgg(eggName)
     end)
     
-    local CloseBtn = CreateButton(ScrollFrame, "❌ Đóng", 12, Color3.fromRGB(244, 67, 54))
+    local CloseBtn = CreateButton(ScrollFrame, "❌ Đóng", 8, Color3.fromRGB(244, 67, 54))
     CloseBtn.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
         IsUILoaded = false
@@ -228,7 +172,7 @@ function Spawner.CreateUI()
     
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     local openTween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-        Size = UDim2.new(0, 400, 0, 450)
+        Size = UDim2.new(0, 400, 0, 380)
     })
     openTween:Play()
     
@@ -364,8 +308,7 @@ spawn(function()
     print("HoDat Hub: Script đã sẵn sàng!")
     print("HoDat Hub: Sử dụng Hodat() để mở UI")
     print("HoDat Hub: Hoặc sử dụng các function riêng lẻ:")
-    print("  - Spawner.SpawnPet('Raccoon', 1, 2)")
-    print("  - Spawner.SpawnSeed('Candy Blossom')")  
+    print("  - Spawner.SpawnPet('Raccoon', 1)")
     print("  - Spawner.SpawnEgg('Night Egg')")
 end)
 local function ProtectScript()
